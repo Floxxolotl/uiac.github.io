@@ -1,0 +1,192 @@
+<div style="font-family: Arial, sans-serif; color: #ddd; margin: 40px 8%;">
+  <div style="background:#111; border:2px solid #de5804; border-radius:18px; padding:25px; box-shadow:0 0 10px rgba(222,88,4,0.25);">
+    <h2 style="color: #de5804; text-align: center; margin-top: 0; margin-bottom: 20px; font-size: 28px;">🎨 Lackierungspreise</h2>
+
+    <!-- Preisrechner Start -->
+    <div style="background: #222; border: 1px solid #de5804; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+      <h3 style="color: #fff; margin-top: 0; margin-bottom: 15px; font-size: 20px;">🧮 Lackierungs-Rechner</h3>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+        <select id="calcAuto" style="flex: 1; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px;">
+          <option value="0">Auto wählen...</option>
+        </select>
+        <select id="calcFarbe" style="flex: 1; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px;">
+          <option value="0">Keine Farbe / Original</option>
+        </select>
+        <select id="calcRabatt" style="flex: 1; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px;">
+          <option value="none">Kein Rabatt</option>
+          <option value="mitarbeiter">Mitarbeiter Rabatt (50%)</option>
+          <option value="mechanikerplus">Mechaniker Plus Rabatt (25%)</option>
+          <option value="steinercar">Steinercar Rabatt (50%)</option>
+        </select>
+      </div>  
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button onclick="calculatePrice()" style="padding: 10px 20px; background: #de5804; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background 0.2s;">Berechnen</button>
+        <div id="calcResult" style="font-size: 22px; font-weight: bold; color: #28a745;">Gesamtpreis: 0 €</div>
+      </div>
+    </div>
+    <!-- Preisrechner Ende -->
+
+    <input type="text" onkeyup="searchTable(this)" placeholder="Tabelle durchsuchen..." style="width: 100%; padding: 12px; margin-bottom: 20px; background: #222; border: 1px solid #de5804; border-radius: 8px; color: #fff; font-size: 16px; outline: none; box-sizing: border-box;">
+
+    <style>
+      .preis-tabelle { width: 100%; border-collapse: collapse; text-align: left; font-size: 16px; }
+      .preis-tabelle th { padding: 15px; color: #de5804; background-color: #222; border-bottom: 3px solid #de5804; }
+      .preis-tabelle td { padding: 12px 15px; border-bottom: 1px solid #333; }
+      .preis-tabelle tbody td:nth-child(1) { font-weight: bold; color: #de5804; }
+      .preis-tabelle tbody td:nth-child(2) { font-weight: bold; color: #fff; }
+      .preis-tabelle tbody td:nth-child(3) { color: #28a745; }
+      .cw { font-weight: bold; color: #fff; }
+      .cg { color: #28a745; }
+      .ce { color: #777; }
+    </style>
+    <div style="overflow-x: auto;">
+      <table class="preis-tabelle">
+        <thead>
+          <tr>
+            <th>Nr.</th>
+            <th>Auto / Objekt</th>
+            <th>Preis (Auto)</th>
+            <th>Farbe</th>
+            <th>Preis (Farbe)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Mini Cooper</td><td>550 €</td><td class="cw">Weiß</td><td class="cg">150 €</td></tr>
+          <tr><td>2</td><td>Peugeot 208</td><td>550 €</td><td class="cw">Schwarz</td><td class="cg">150 €</td></tr>
+          <tr><td>3</td><td>Honda-E</td><td>550 €</td><td class="cw">Grau</td><td class="cg">300 €</td></tr>
+          <tr><td>4</td><td>Roller</td><td>550 €</td><td class="cw">Pink</td><td class="cg">300 €</td></tr>
+          <tr><td>5</td><td>Citroen C5</td><td>650 €</td><td class="cw">Violett</td><td class="cg">400 €</td></tr>
+          <tr><td>6</td><td>Renault Kangoo</td><td>800 €</td><td class="cw">Rot</td><td class="cg">500 €</td></tr>
+          <tr><td>7</td><td>Mazda Mx-5</td><td>800 €</td><td class="cw">Grün</td><td class="cg">500 €</td></tr>
+          <tr><td>8</td><td>Ds7 Crossback</td><td>900 €</td><td class="cw">Blau</td><td class="cg">500 €</td></tr>
+          <tr><td>9</td><td>Peugeot 5008</td><td>900 €</td><td class="cw">Rot</td><td class="cg">500 €</td></tr>
+          <tr><td>10</td><td>Mercedes Sprinter</td><td>900 €</td><td class="cw">Orange</td><td class="cg">500 €</td></tr>
+          <tr><td>11</td><td>Renault Megane IV</td><td>900 €</td><td class="cw">Gelb</td><td class="cg">500 €</td></tr>
+          <tr><td>12</td><td>Audi RS6</td><td>1.200 €</td><td class="cw">Hellblau</td><td class="cg">800 €</td></tr>
+          <tr><td>13</td><td>Ford Raptor Ranger</td><td>1.200 €</td><td class="cw">Dunkelblau</td><td class="cg">800 €</td></tr>
+          <tr><td>14</td><td>Mercedes C-Class</td><td>1.200 €</td><td class="cw">Dunkelgrün</td><td class="cg">800 €</td></tr>
+          <tr><td>15</td><td>Ford Transit 2015</td><td>1.200 €</td><td class="cw">Weinrot</td><td class="cg">999 €</td></tr>
+          <tr><td>16</td><td>Toyota Supra</td><td>1.300 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>17</td><td>Alpine 110</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>18</td><td>BMW M4</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>19</td><td>Tesla Model X</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>20</td><td>Ford Mustang Shelby GT500</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>21</td><td>Cadillac Escalade 2022</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>22</td><td>Dodge RAM 1500</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>23</td><td>Range Rover SVR</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>24</td><td>Ford Mustang Shelby GT500 2010</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>25</td><td>Dodge Challanger</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>26</td><td>Nissan GTR</td><td>1.750 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>27</td><td>BMW M4 2021</td><td>1.800 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>28</td><td>Tesla Model S</td><td>1.850 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>29</td><td>Ford Mustang Shelby GT500 Eleanor</td><td>3.400 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>30</td><td>Boote</td><td>3.500 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>31</td><td>Porsche 911 GT3</td><td>3.500 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>32</td><td>Rolls-Royce Ghost</td><td>4.700 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>33</td><td>Mclaren 720S</td><td>5.000 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>34</td><td>Mercedes AMG GT Black Series</td><td>5.500 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+          <tr><td>35</td><td>Bugatti Chiron</td><td>10.001 €</td><td class="ce">-</td><td class="ce">-</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    if (typeof searchTable !== 'function') {
+      function searchTable(inputElem) {
+        let filter = inputElem.value.toLowerCase();
+        let table = inputElem.parentElement.querySelector(".preis-tabelle");
+        let rows = table.querySelectorAll("tbody tr");
+        
+        rows.forEach(row => {
+          row.style.display = row.textContent.toLowerCase().includes(filter) ? "" : "none";
+        });
+      }
+    }
+
+    // Preisrechner Logik
+    (function initCalculator() {
+      const autoSelect = document.getElementById('calcAuto');
+      const farbeSelect = document.getElementById('calcFarbe');
+      const tableRows = document.querySelectorAll('.preis-tabelle tbody tr');
+      
+      if (!autoSelect || !farbeSelect) return;
+
+      const autos = [];
+      const farben = new Map();
+
+      // Daten aus der Tabelle auslesen
+      tableRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length === 5) {
+          const autoName = cells[1].textContent.trim();
+          const autoPreisStr = cells[2].textContent.trim();
+          const farbeName = cells[3].textContent.trim();
+          const farbePreisStr = cells[4].textContent.trim();
+
+          if (autoPreisStr !== "-" && autoName !== "-") {
+            const preis = parseInt(autoPreisStr.replace(/[^\d]/g, ''), 10);
+            if (!isNaN(preis)) autos.push({ name: autoName, preis: preis });
+          }
+
+          if (farbePreisStr !== "-" && farbeName !== "-") {
+            const preis = parseInt(farbePreisStr.replace(/[^\d]/g, ''), 10);
+            if (!isNaN(preis) && !farben.has(farbeName)) farben.set(farbeName, preis);
+          }
+        }
+      });
+
+      // Autos ins Dropdown füllen (Alphabetisch sortiert)
+      autos.sort((a, b) => a.name.localeCompare(b.name)).forEach(auto => {
+        let opt = document.createElement('option');
+        opt.value = auto.preis;
+        opt.textContent = `${auto.name} (${auto.preis.toLocaleString('de-DE')} €)`;
+        autoSelect.appendChild(opt);
+      });
+
+      // Farben ins Dropdown füllen (Alphabetisch sortiert)
+      Array.from(farben.entries()).sort((a, b) => a[0].localeCompare(b[0])).forEach(([name, preis]) => {
+        let opt = document.createElement('option');
+        opt.value = preis;
+        opt.textContent = `${name} (${preis.toLocaleString('de-DE')} €)`;
+        farbeSelect.appendChild(opt);
+      });
+    })();
+
+    function calculatePrice() {
+      const autoPreis = parseInt(document.getElementById('calcAuto').value) || 0;
+      const farbePreis = parseInt(document.getElementById('calcFarbe').value) || 0;
+      const rabattTyp = document.getElementById('calcRabatt').value;
+      
+      const summe = autoPreis + farbePreis;
+      let endPreis = summe;
+      
+      if (rabattTyp === "mitarbeiter") {
+        endPreis = summe * 0.5; // 50% Rabatt
+        if (endPreis < 500) {
+          endPreis = 500; // Mindestens 500€ zahlen
+        }
+        // Verhindern, dass der Preis fälschlicherweise auf 500€ steigt, falls die normale Summe schon unter 500€ liegt
+        if (summe < 500) {
+          endPreis = summe;
+        }
+      } else if (rabattTyp === "steinercar") {
+        endPreis = summe * 0.5; // 50% Rabatt ohne Mindestgrenze
+      } else if (rabattTyp === "mechanikerplus") {
+        endPreis = summe * 0.75; // 25% Rabatt
+      }
+
+      const resultElem = document.getElementById('calcResult');
+      if (autoPreis === 0 && farbePreis === 0) {
+        resultElem.textContent = "Bitte etwas auswählen!";
+        resultElem.style.color = "#de5804";
+      } else {
+        resultElem.textContent = `Gesamtpreis: ${Math.round(endPreis).toLocaleString('de-DE')} €`;
+        resultElem.style.color = "#28a745";
+      }
+    }
+  </script>
+</div>
+
+<span style="opacity:0;">
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</span>
