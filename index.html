@@ -14,12 +14,10 @@
           <input type="text" id="calcFarbe" autocomplete="off" placeholder="Farbe suchen..." style="width: 100%; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px; box-sizing: border-box;">
           <div id="farbeDropdown" class="custom-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #222; border: 1px solid #de5804; border-top: none; border-radius: 0 0 5px 5px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);"></div>
         </div>
-        <select id="calcRabatt" style="flex: 1; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px;">
-          <option value="none">Kein Rabatt</option>
-          <option value="mitarbeiter">Mitarbeiter Rabatt (50%)</option>
-          <option value="mechanikerplus">Mechaniker Plus Rabatt (25%)</option>
-          <option value="steinercar">Steinercar Rabatt (50%)</option>
-        </select>
+        <div style="position: relative; flex: 1; min-width: 200px;">
+          <input type="text" id="calcRabatt" autocomplete="off" placeholder="Rabatt wählen..." value="Kein Rabatt" style="width: 100%; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px; box-sizing: border-box;">
+          <div id="rabattDropdown" class="custom-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #222; border: 1px solid #de5804; border-top: none; border-radius: 0 0 5px 5px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);"></div>
+        </div>
       </div>  
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <button onclick="calculatePrice()" style="padding: 10px 20px; background: #de5804; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background 0.2s;">Berechnen</button>
@@ -117,6 +115,7 @@
     let preisKatalog = new Map();
     let autoDataList = [];
     let farbeDataList = [];
+    let rabattDataList = ["Kein Rabatt", "Mitarbeiter Rabatt (50%)", "Mechaniker Plus Rabatt (25%)", "Steinercar Rabatt (50%)"];
 
     // Preisrechner Logik
     (function initCalculator() {
@@ -161,6 +160,7 @@
 
       setupCustomDropdown('calcAuto', 'autoDropdown', autoDataList);
       setupCustomDropdown('calcFarbe', 'farbeDropdown', farbeDataList);
+      setupCustomDropdown('calcRabatt', 'rabattDropdown', rabattDataList);
     })();
 
     // Generische Funktion, um ein Dropdown aufzubauen
@@ -192,7 +192,10 @@
       }
 
       input.addEventListener('input', () => renderList(input.value));
-      input.addEventListener('focus', () => renderList(input.value));
+      input.addEventListener('focus', () => { 
+        input.select(); 
+        renderList(''); 
+      });
       // Leichte Verzögerung beim Schließen, damit ein möglicher Klick im Dropdown noch erkannt wird
       input.addEventListener('blur', () => { setTimeout(() => { dropdown.style.display = 'none'; }, 200); });
     }
@@ -205,7 +208,7 @@
       const summe = autoPreis + farbePreis;
       let endPreis = summe;
       
-      if (rabattTyp === "mitarbeiter") {
+      if (rabattTyp === "Mitarbeiter Rabatt (50%)") {
         endPreis = summe * 0.5; // 50% Rabatt
         if (endPreis < 500) {
           endPreis = 500; // Mindestens 500€ zahlen
@@ -214,9 +217,9 @@
         if (summe < 500) {
           endPreis = summe;
         }
-      } else if (rabattTyp === "steinercar") {
+      } else if (rabattTyp === "Steinercar Rabatt (50%)") {
         endPreis = summe * 0.5; // 50% Rabatt ohne Mindestgrenze
-      } else if (rabattTyp === "mechanikerplus") {
+      } else if (rabattTyp === "Mechaniker Plus Rabatt (25%)") {
         endPreis = summe * 0.75; // 25% Rabatt
       }
 
