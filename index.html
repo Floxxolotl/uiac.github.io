@@ -6,12 +6,14 @@
     <div style="background: #222; border: 1px solid #de5804; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
       <h3 style="color: #fff; margin-top: 0; margin-bottom: 15px; font-size: 20px;">🧮 Lackierungs-Rechner</h3>
       <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
-        <select id="calcAuto" style="flex: 1; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px;">
-          <option value="0">Auto wählen...</option>
-        </select>
-        <select id="calcFarbe" style="flex: 1; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px;">
-          <option value="0">Keine Farbe / Original</option>
-        </select>
+        <div style="position: relative; flex: 1; min-width: 200px;">
+          <input type="text" id="calcAuto" autocomplete="off" placeholder="Auto suchen..." style="width: 100%; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px; box-sizing: border-box;">
+          <div id="autoDropdown" class="custom-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #222; border: 1px solid #de5804; border-top: none; border-radius: 0 0 5px 5px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);"></div>
+        </div>
+        <div style="position: relative; flex: 1; min-width: 200px;">
+          <input type="text" id="calcFarbe" autocomplete="off" placeholder="Farbe suchen..." style="width: 100%; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px; box-sizing: border-box;">
+          <div id="farbeDropdown" class="custom-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #222; border: 1px solid #de5804; border-top: none; border-radius: 0 0 5px 5px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);"></div>
+        </div>
         <select id="calcRabatt" style="flex: 1; padding: 10px; background: #111; border: 1px solid #de5804; color: #fff; border-radius: 5px; outline: none; font-size: 15px;">
           <option value="none">Kein Rabatt</option>
           <option value="mitarbeiter">Mitarbeiter Rabatt (50%)</option>
@@ -39,6 +41,13 @@
       .cw { font-weight: bold; color: #fff; }
       .cg { color: #28a745; }
       .ce { color: #777; }
+      .custom-dropdown-item { padding: 10px; cursor: pointer; color: #fff; border-bottom: 1px solid #333; transition: background 0.2s; font-size: 15px; }
+      .custom-dropdown-item:last-child { border-bottom: none; }
+      .custom-dropdown-item:hover { background: #de5804; color: #fff; }
+      /* Stylings für den Scrollbalken der Dropdowns */
+      .custom-dropdown::-webkit-scrollbar { width: 8px; }
+      .custom-dropdown::-webkit-scrollbar-track { background: #111; border-radius: 0 0 5px 0; }
+      .custom-dropdown::-webkit-scrollbar-thumb { background: #de5804; border-radius: 4px; }
     </style>
     <div style="overflow-x: auto;">
       <table class="preis-tabelle">
@@ -105,13 +114,14 @@
       }
     }
 
+    let preisKatalog = new Map();
+    let autoDataList = [];
+    let farbeDataList = [];
+
     // Preisrechner Logik
     (function initCalculator() {
-      const autoSelect = document.getElementById('calcAuto');
-      const farbeSelect = document.getElementById('calcFarbe');
       const tableRows = document.querySelectorAll('.preis-tabelle tbody tr');
       
-      if (!autoSelect || !farbeSelect) return;
 
       const autos = [];
       const farben = new Map();
@@ -137,26 +147,59 @@
         }
       });
 
-      // Autos ins Dropdown füllen (Alphabetisch sortiert)
       autos.sort((a, b) => a.name.localeCompare(b.name)).forEach(auto => {
-        let opt = document.createElement('option');
-        opt.value = auto.preis;
-        opt.textContent = `${auto.name} (${auto.preis.toLocaleString('de-DE')} €)`;
-        autoSelect.appendChild(opt);
+        const text = `${auto.name} (${auto.preis.toLocaleString('de-DE')} €)`;
+        preisKatalog.set(text, auto.preis);
+        autoDataList.push(text);
       });
 
-      // Farben ins Dropdown füllen (Alphabetisch sortiert)
       Array.from(farben.entries()).sort((a, b) => a[0].localeCompare(b[0])).forEach(([name, preis]) => {
-        let opt = document.createElement('option');
-        opt.value = preis;
-        opt.textContent = `${name} (${preis.toLocaleString('de-DE')} €)`;
-        farbeSelect.appendChild(opt);
+        const text = `${name} (${preis.toLocaleString('de-DE')} €)`;
+        preisKatalog.set(text, preis);
+        farbeDataList.push(text);
       });
+
+      setupCustomDropdown('calcAuto', 'autoDropdown', autoDataList);
+      setupCustomDropdown('calcFarbe', 'farbeDropdown', farbeDataList);
     })();
 
+    // Generische Funktion, um ein Dropdown aufzubauen
+    function setupCustomDropdown(inputId, dropdownId, dataList) {
+      const input = document.getElementById(inputId);
+      const dropdown = document.getElementById(dropdownId);
+      
+      function renderList(filterText) {
+        dropdown.innerHTML = '';
+        const filter = filterText.toLowerCase();
+        let matches = dataList.filter(item => item.toLowerCase().includes(filter));
+        
+        if (matches.length === 0) {
+          dropdown.style.display = 'none';
+          return;
+        }
+        
+        matches.forEach(item => {
+          let div = document.createElement('div');
+          div.className = 'custom-dropdown-item';
+          div.textContent = item;
+          div.onclick = function() {
+            input.value = item;
+            dropdown.style.display = 'none';
+          };
+          dropdown.appendChild(div);
+        });
+        dropdown.style.display = 'block';
+      }
+
+      input.addEventListener('input', () => renderList(input.value));
+      input.addEventListener('focus', () => renderList(input.value));
+      // Leichte Verzögerung beim Schließen, damit ein möglicher Klick im Dropdown noch erkannt wird
+      input.addEventListener('blur', () => { setTimeout(() => { dropdown.style.display = 'none'; }, 200); });
+    }
+
     function calculatePrice() {
-      const autoPreis = parseInt(document.getElementById('calcAuto').value) || 0;
-      const farbePreis = parseInt(document.getElementById('calcFarbe').value) || 0;
+      const autoPreis = preisKatalog.get(document.getElementById('calcAuto').value) || 0;
+      const farbePreis = preisKatalog.get(document.getElementById('calcFarbe').value) || 0;
       const rabattTyp = document.getElementById('calcRabatt').value;
       
       const summe = autoPreis + farbePreis;
